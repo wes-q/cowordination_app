@@ -1,0 +1,61 @@
+services:
+    app:
+        image: cowordination-front-dev
+        build:
+            context: ./client
+            dockerfile: dev.Dockerfile
+        volumes:
+            - ./client/:/usr/src/app
+        ports:
+            - 5173:5173
+        container_name: cowordination-front-dev
+#     server:
+#         image: wesbook-back-dev
+#         build:
+#             context: ./server
+#             dockerfile: dev.Dockerfile
+#         volumes:
+#             - ./server/:/usr/src/app
+#         # ports:
+#         #     - 3001:3001
+#         container_name: wesbook-back-dev
+#         env_file:
+#             - ./server/.env
+#         # environment:
+#         # REDIS_URL: //redis
+#         depends_on:
+#             - mongo
+
+#     nginx:
+#         image: nginx:1.20.1
+#         volumes:
+#             - ./nginx.dev.conf:/etc/nginx/nginx.conf:ro
+#         ports:
+#             - 8080:80
+#         container_name: reverse-proxy
+#         depends_on:
+#             - app
+
+#     mongo:
+#         image: mongo
+#         ports:
+#             - 3456:27017
+#         environment:
+#             MONGO_INITDB_ROOT_USERNAME: root
+#             MONGO_INITDB_ROOT_PASSWORD: example
+#             MONGO_INITDB_DATABASE: wesbookDB
+#         volumes:
+#             - ./server/mongo/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+#             - wesbook_data:/data/db
+
+#     # redis:
+#     #     image: redis:latest
+#     #     restart: always
+#     #     ports:
+#     #         - "6379:6379"
+#     #     command: ["redis-server", "--appendonly", "yes"]
+#     #     volumes:
+#     #         - ./todo-backend/redis_data:/data
+
+# volumes:
+#     wesbook_data:
