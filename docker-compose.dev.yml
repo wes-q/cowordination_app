@@ -20,8 +20,8 @@ services:
         ports:
             - 3002:3002
         container_name: cowordination-back-dev
-        # env_file:
-        #     - ./server/.env
+        env_file:
+            - ./server/.env
 #     nginx:
 #         image: nginx:1.20.1
 #         volumes:

@@ -3,11 +3,12 @@ const http = require("http");
 const socketIO = require("socket.io");
 const app = express();
 const server = http.createServer(app);
+const config = require("./src/utils/config");
 
 const { Server } = require("socket.io");
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:5173", //TODO: remove hardcode
+        origin: config.FRONTEND_URL,
     },
 });
 
@@ -25,7 +26,6 @@ io.on("connection", (socket) => {
 });
 
 // Start the server
-const PORT = 3002;
-server.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+server.listen(config.PORT, () => {
+    console.log(`Server is running on http://localhost:${config.PORT}`);
 });
