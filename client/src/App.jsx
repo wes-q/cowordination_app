@@ -8,16 +8,22 @@ import LoginPage from "./pages/LoginPage";
 import { socket } from "./socket";
 
 const App = () => {
+    const [isConnected, setIsConnected] = useState(false);
     const [currentUser, setCurrentUser] = useState("");
     const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
 
     useEffect(() => {
-        socket.on("message", (message) => {
-            console.log("Received message:", message);
+        socket.on("connect", () => {
+            setIsConnected(true);
+        });
+
+        socket.on("disconnect", () => {
+            setIsConnected(false);
         });
 
         return () => {
-            socket.disconnect();
+            socket.off("connect");
+            socket.off("disconnect");
         };
     }, []);
 

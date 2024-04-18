@@ -9,16 +9,6 @@ const LobbyPage = ({ currentUser }) => {
     const navigate = useNavigate();
     const MAXLENGTHOFROOMCODE = 4;
 
-    // useEffect(() => {
-    //     socket.on("sayHello", (message) => {
-    //         console.log("Broadcasted message:", message);
-    //     });
-
-    //     return () => {
-    //         socket.disconnect();
-    //     };
-    // }, []);
-
     const logout = () => {
         window.localStorage.removeItem("loggedUserName");
         navigate("/login");
@@ -41,11 +31,6 @@ const LobbyPage = ({ currentUser }) => {
         // handle duplicate room codes here
         // navigate("/room");
         handleJoinRoom(roomCode);
-    };
-
-    const handleBroadcast = () => {
-        alert();
-        socket.emit("broadcast");
     };
 
     function generateRoomCode() {

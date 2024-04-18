@@ -6,4 +6,4 @@ import { io } from "socket.io-client";
 // const URL = process.env.NODE_ENV === "production" ? undefined : `${import.meta.env.VITE_SERVER_URL}`;
 // const URL = `${import.meta.env.VITE_SERVER_URL}`;
 
-export const socket = io("http://localhost:3002");
+export const socket = io.connect("http://localhost:3002");

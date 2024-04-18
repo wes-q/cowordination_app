@@ -16,20 +16,21 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
     console.log("A user connected");
 
-    // Emit a message to the client
-    socket.emit("message", "Welcome to the Socket.io server!");
-
     socket.on("joinRoom", (roomCode, currentUser) => {
         socket.join(roomCode);
-        console.log(`Client ${currentUser} joined ${roomCode}`);
+        console.log(`User ${currentUser} joined ${roomCode}`);
     });
 
-    // socket.on("broadcast", () => {
-    //     console.log("broadcast received by server");
-    //     io.to("WESQ").emit("sayHello", "Hello World!");
-    // });
+    socket.on("leaveRoom", (roomCode, currentUser) => {
+        socket.leave(roomCode);
+        console.log(`User ${currentUser} left ${roomCode}`);
+    });
 
-    // Handle disconnection
+    socket.on("broadcast", (roomCode, currentUser) => {
+        console.log(`broadcast received by server ${roomCode} ${currentUser}`);
+        io.to(roomCode).emit("broadcast", `${currentUser} says "Hello World!" to everybody`);
+    });
+
     socket.on("disconnect", () => {
         console.log("User disconnected");
     });
