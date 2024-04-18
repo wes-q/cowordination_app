@@ -4,8 +4,7 @@ import { useState } from "react";
 import { socket } from "../socket";
 
 const LobbyPage = ({ currentUser }) => {
-    const [roomCode, setRoomCode] = useState("");
-    const [currentRoomCode, setCurrentRoomCode] = useState("");
+    const [roomCodeToJoin, setRoomCodeToJoin] = useState("");
     const navigate = useNavigate();
     const MAXLENGTHOFROOMCODE = 4;
 
@@ -17,20 +16,20 @@ const LobbyPage = ({ currentUser }) => {
     const handleChange = (event) => {
         const capitalizedValue = event.target.value.toUpperCase();
         if (event.target.value.length <= MAXLENGTHOFROOMCODE) {
-            setRoomCode(capitalizedValue);
+            setRoomCodeToJoin(capitalizedValue);
         }
     };
 
-    const handleJoinRoom = (roomCode) => {
-        navigate(`/room/${roomCode}`);
+    const handleJoinRoom = (roomCodeToJoin) => {
+        socket.emit("joinRoom", roomCodeToJoin, currentUser);
+        navigate(`/room/${roomCodeToJoin}`);
     };
 
     const handleCreateRoom = () => {
-        const roomCode = generateRoomCode();
-        socket.emit("joinRoom", roomCode, currentUser);
-        // handle duplicate room codes here
-        // navigate("/room");
-        handleJoinRoom(roomCode);
+        const generatedRoomCode = generateRoomCode();
+        socket.emit("joinRoom", generatedRoomCode, currentUser);
+        // TODO: handle duplicate room codes here
+        navigate(`/room/${generatedRoomCode}`);
     };
 
     function generateRoomCode() {
@@ -47,10 +46,10 @@ const LobbyPage = ({ currentUser }) => {
                     Create a Room
                 </button>
                 <span>or</span>
-                <button className="ml-2 w-full bg-cyan-400 hover:ring-cyan-500 hover:ring-1 hover:shadow-md text-white font-bold py-2 px-4 rounded focus:outline-none mr-2 transition-all" type="button" onClick={() => handleJoinRoom()}>
+                <button className="ml-2 w-full bg-cyan-400 hover:ring-cyan-500 hover:ring-1 hover:shadow-md text-white font-bold py-2 px-4 rounded focus:outline-none mr-2 transition-all" type="button" onClick={() => handleJoinRoom(roomCodeToJoin)}>
                     Join Room
                 </button>
-                <input type="text" name="roomCode" value={roomCode} onChange={handleChange} className="text-center mt-1 w-full px-3 py-2 bg-white border shadow-sm border-slate-400 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-cyan-400 rounded-md sm:text-sm focus:ring-1" placeholder="Room Code" autoFocus autoCapitalize="characters" spellCheck="false" />
+                <input type="text" name="roomCodeToJoin" value={roomCodeToJoin} onChange={handleChange} className="text-center mt-1 w-full px-3 py-2 bg-white border shadow-sm border-slate-400 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-cyan-400 rounded-md sm:text-sm focus:ring-1" placeholder="Room Code" autoFocus autoCapitalize="characters" spellCheck="false" />
             </div>
         </>
     );

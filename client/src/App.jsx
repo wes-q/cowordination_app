@@ -42,7 +42,6 @@ const App = () => {
     const router = createBrowserRouter(
         createRoutesFromElements(
             <>
-                {/* <Route element={<PrivateRoutes user={currentUser} isUserLoggedIn={isUserLoggedIn} />}> */}
                 <Route element={isUserLoggedIn ? <PrivateRoutes isUserLoggedIn={isUserLoggedIn} /> : <LoginPage />}>
                     <Route index element={<LobbyPage currentUser={currentUser} />} />
                     <Route path="room/:roomCode" element={<RoomPage currentUser={currentUser} />} />

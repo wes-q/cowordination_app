@@ -15,6 +15,15 @@ const RoomPage = ({ currentUser }) => {
         };
     }, []);
 
+    useEffect(() => {
+        autoJoinRoom(roomCode);
+    }, []);
+
+    const autoJoinRoom = (roomCodeToJoin) => {
+        socket.emit("joinRoom", roomCodeToJoin, currentUser);
+        navigate(`/room/${roomCodeToJoin}`);
+    };
+
     const handleLeaveRoom = () => {
         socket.emit("leaveRoom", roomCode, currentUser);
         navigate("/");

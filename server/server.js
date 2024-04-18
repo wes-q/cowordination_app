@@ -12,7 +12,6 @@ const io = new Server(server, {
     },
 });
 
-// Socket.io connection event
 io.on("connection", (socket) => {
     console.log("A user connected");
 
@@ -36,7 +35,6 @@ io.on("connection", (socket) => {
     });
 });
 
-// Start the server
 server.listen(config.PORT, () => {
     console.log(`Server is running on http://localhost:${config.PORT}`);
 });
