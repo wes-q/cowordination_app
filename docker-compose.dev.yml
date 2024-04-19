@@ -1,24 +1,24 @@
 services:
     app:
-        image: cowordination-front-dev
+        # image: cowordination-front-dev
         build:
             context: ./client
             dockerfile: dev.Dockerfile
         volumes:
             - ./client/:/usr/src/app
-            - /usr/src/app/node_modules
+            # - /usr/src/app/node_modules
         ports:
             - 5173:5173
         container_name: cowordination-front-dev
 
     server:
-        image: cowordination-back-dev
+        # image: cowordination-back-dev
         build:
             context: ./server
             dockerfile: dev.Dockerfile
         volumes:
             - ./server/:/usr/src/app
-            - /usr/src/app/node_modules
+            # - /usr/src/app/node_modules
         ports:
             - 3002:3002
         container_name: cowordination-back-dev
