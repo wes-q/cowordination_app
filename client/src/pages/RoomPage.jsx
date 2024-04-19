@@ -7,6 +7,7 @@ import PlayersInRoom from "../components/PlayersInRoom";
 const RoomPage = ({ currentUser }) => {
     const [players, setPlayers] = useState([]);
     const { roomCode } = useParams();
+    const [isGameStarted, setIsGameStarted] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -17,12 +18,19 @@ const RoomPage = ({ currentUser }) => {
             console.log("UPDATED PLAYER LIST");
             setPlayers(updatedPlayers);
         });
+        socket.on("startGameSent", () => {
+            console.log("Started Game");
+            setIsGameStarted(true);
+        });
+
         // fetchPlayersInRoom(roomCode);
         // socket.emit("joinRoom", roomCode, currentUser); // try this for autojoin
 
         return () => {
             socket.off("broadcastSent");
-            socket.emit("leaveRoom", roomCode, currentUser); // try later for auto logout
+            socket.off("updatePlayerList");
+            socket.off("startGameSent");
+            // socket.emit("leaveRoom", roomCode, currentUser); // try later for auto logout
         };
     }, []);
 
@@ -45,6 +53,7 @@ const RoomPage = ({ currentUser }) => {
     // };
 
     const handleLeaveRoom = () => {
+        console.log("Handle leave room");
         socket.emit("leaveRoom", roomCode, currentUser);
         navigate("/");
     };
@@ -53,16 +62,24 @@ const RoomPage = ({ currentUser }) => {
         socket.emit("broadcastReceived", roomCode, currentUser);
     };
 
+    const handleStartGame = () => {
+        socket.emit("startGameReceived", roomCode);
+    };
+
     return (
         <div className="flex">
-            <div className="flex flex-col">
+            <div className="flex flex-col gap-1">
                 <h1>Room Page</h1>
                 <h2>Logged in as: {currentUser}</h2>
                 <h2>Room Code: {roomCode}</h2>
-                <span onClick={handleLeaveRoom}>Leave Room</span>
+                <span onClick={() => handleLeaveRoom()}>Leave Room</span>
                 <button className="ml-2 w-96 bg-cyan-400 hover:ring-cyan-500 hover:ring-1 hover:shadow-md text-white font-bold py-2 px-4 rounded focus:outline-none mr-2 transition-all" type="button" onClick={() => handleBroadcast()}>
                     Broadcast to Everyone in Room
                 </button>
+                <button className="ml-2 w-96 bg-cyan-400 hover:ring-cyan-500 hover:ring-1 hover:shadow-md text-white font-bold py-2 px-4 rounded focus:outline-none mr-2 transition-all" type="button" onClick={() => handleStartGame(roomCode)}>
+                    Start Game
+                </button>
+                {isGameStarted && <span>Game started!</span>}
             </div>
             <div className="flex flex-col">
                 <PlayersInRoom players={players} />

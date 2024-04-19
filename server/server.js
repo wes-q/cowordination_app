@@ -6,7 +6,7 @@ const server = http.createServer(app);
 const config = require("./src/utils/config");
 const cors = require("cors");
 
-let rooms = {}; // stores players array in a room {"roomCode":["user1","user2","user3"]}
+let rooms = {}; // stores players array in a room {"players":["user1","user2","user3"],"isGameStarted":boolean}
 
 const { Server } = require("socket.io");
 const io = new Server(server, {
@@ -34,20 +34,26 @@ io.on("connection", (socket) => {
         socket.join(roomCode);
         initializeRoom(roomCode);
         addPlayerToRoom(roomCode, currentUser);
-        io.to(roomCode).emit("updatePlayerList", rooms[roomCode]);
+        io.to(roomCode).emit("updatePlayerList", rooms[roomCode].players);
         console.log(`User ${currentUser} joined ${roomCode}`);
     });
 
     socket.on("leaveRoom", (roomCode, currentUser) => {
+        console.log("once");
         socket.leave(roomCode);
         removePlayerFromRoom(roomCode, currentUser);
-        io.to(roomCode).emit("updatePlayerList", rooms[roomCode]);
+        io.to(roomCode).emit("updatePlayerList", rooms[roomCode].players);
         console.log(`User ${currentUser} left ${roomCode}`);
     });
 
     socket.on("broadcastReceived", (roomCode, currentUser) => {
-        console.log(`broadcast received by server ${roomCode} ${currentUser}`);
         io.to(roomCode).emit("broadcastSent", `${currentUser} says "Hello World!" to everybody`);
+        console.log(`broadcast received by server ${roomCode} ${currentUser}`);
+    });
+
+    socket.on("startGameReceived", (roomCode) => {
+        io.to(roomCode).emit("startGameSent");
+        console.log(`Game started on room ${roomCode}`);
     });
 
     socket.on("disconnect", () => {
@@ -56,16 +62,19 @@ io.on("connection", (socket) => {
 
     const initializeRoom = (roomCode) => {
         if (!rooms[roomCode]) {
-            rooms[roomCode] = [];
+            rooms[roomCode] = {
+                players: [],
+                isGameStarted: false,
+            };
         }
     };
 
     const addPlayerToRoom = (roomCode, currentUser) => {
-        rooms[roomCode].push(currentUser);
+        rooms[roomCode].players.push(currentUser);
     };
 
     const removePlayerFromRoom = (roomCode, currentUser) => {
-        rooms[roomCode] = rooms[roomCode].filter((user) => user !== currentUser);
+        rooms[roomCode].players = rooms[roomCode].players.filter((user) => user !== currentUser);
     };
 });
 
