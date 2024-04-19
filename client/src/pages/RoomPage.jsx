@@ -2,55 +2,10 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { socket } from "../socket";
 import PlayersInRoom from "../components/PlayersInRoom";
-// import axios from "axios";
 
-const RoomPage = ({ currentUser }) => {
-    const [players, setPlayers] = useState([]);
+const RoomPage = ({ currentUser, players, isGameStarted }) => {
     const { roomCode } = useParams();
-    const [isGameStarted, setIsGameStarted] = useState(false);
     const navigate = useNavigate();
-
-    useEffect(() => {
-        socket.on("broadcastSent", (message) => {
-            console.log("Broadcasted message:", message);
-        });
-        socket.on("updatePlayerList", (updatedPlayers) => {
-            console.log("UPDATED PLAYER LIST");
-            setPlayers(updatedPlayers);
-        });
-        socket.on("startGameSent", () => {
-            console.log("Started Game");
-            setIsGameStarted(true);
-        });
-
-        // fetchPlayersInRoom(roomCode);
-        // socket.emit("joinRoom", roomCode, currentUser); // try this for autojoin
-
-        return () => {
-            socket.off("broadcastSent");
-            socket.off("updatePlayerList");
-            socket.off("startGameSent");
-            // socket.emit("leaveRoom", roomCode, currentUser); // try later for auto logout
-        };
-    }, []);
-
-    // const fetchPlayersInRoom = async (roomCode) => {
-    //     try {
-    //         const playersInRoom = await axios.get(`http://localhost:3002/rooms/${roomCode}`, { "Content-Type": "application/json" });
-    //         setPlayers(playersInRoom.data);
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // };
-
-    // useEffect(() => {
-    //     autoJoinRoom(roomCode);
-    // }, []);
-
-    // const autoJoinRoom = (roomCodeToJoin) => {
-    //     socket.emit("joinRoom", roomCodeToJoin, currentUser);
-    //     navigate(`/room/${roomCodeToJoin}`);
-    // };
 
     const handleLeaveRoom = () => {
         console.log("Handle leave room");
@@ -66,6 +21,10 @@ const RoomPage = ({ currentUser }) => {
         socket.emit("startGameReceived", roomCode);
     };
 
+    const handleEndGame = () => {
+        socket.emit("endGameReceived", roomCode);
+    };
+
     return (
         <div className="flex">
             <div className="flex flex-col gap-1">
@@ -76,9 +35,15 @@ const RoomPage = ({ currentUser }) => {
                 <button className="ml-2 w-96 bg-cyan-400 hover:ring-cyan-500 hover:ring-1 hover:shadow-md text-white font-bold py-2 px-4 rounded focus:outline-none mr-2 transition-all" type="button" onClick={() => handleBroadcast()}>
                     Broadcast to Everyone in Room
                 </button>
-                <button className="ml-2 w-96 bg-cyan-400 hover:ring-cyan-500 hover:ring-1 hover:shadow-md text-white font-bold py-2 px-4 rounded focus:outline-none mr-2 transition-all" type="button" onClick={() => handleStartGame(roomCode)}>
-                    Start Game
-                </button>
+                {isGameStarted ? (
+                    <button className="ml-2 w-96 bg-cyan-400 hover:ring-cyan-500 hover:ring-1 hover:shadow-md text-white font-bold py-2 px-4 rounded focus:outline-none mr-2 transition-all" type="button" onClick={() => handleEndGame(roomCode)}>
+                        End Game
+                    </button>
+                ) : (
+                    <button className="ml-2 w-96 bg-cyan-400 hover:ring-cyan-500 hover:ring-1 hover:shadow-md text-white font-bold py-2 px-4 rounded focus:outline-none mr-2 transition-all" type="button" onClick={() => handleStartGame(roomCode)}>
+                        Start Game
+                    </button>
+                )}
                 {isGameStarted && <span>Game started!</span>}
             </div>
             <div className="flex flex-col">

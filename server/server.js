@@ -30,16 +30,15 @@ app.use(
 io.on("connection", (socket) => {
     console.log("A user connected");
 
-    socket.on("joinRoom", (roomCode, currentUser) => {
+    socket.on("joinRoomReceived", (roomCode, currentUser) => {
         socket.join(roomCode);
-        initializeRoom(roomCode);
+        initializeRoomIfNotExisting(roomCode);
         addPlayerToRoom(roomCode, currentUser);
         io.to(roomCode).emit("updatePlayerList", rooms[roomCode].players);
         console.log(`User ${currentUser} joined ${roomCode}`);
     });
 
     socket.on("leaveRoom", (roomCode, currentUser) => {
-        console.log("once");
         socket.leave(roomCode);
         removePlayerFromRoom(roomCode, currentUser);
         io.to(roomCode).emit("updatePlayerList", rooms[roomCode].players);
@@ -52,15 +51,21 @@ io.on("connection", (socket) => {
     });
 
     socket.on("startGameReceived", (roomCode) => {
+        rooms[roomCode].isGameStarted = true;
         io.to(roomCode).emit("startGameSent");
         console.log(`Game started on room ${roomCode}`);
+    });
+    socket.on("endGameReceived", (roomCode) => {
+        rooms[roomCode].isGameStarted = false;
+        io.to(roomCode).emit("endGameSent");
+        console.log(`Game ended on room ${roomCode}`);
     });
 
     socket.on("disconnect", () => {
         console.log("User disconnected");
     });
 
-    const initializeRoom = (roomCode) => {
+    const initializeRoomIfNotExisting = (roomCode) => {
         if (!rooms[roomCode]) {
             rooms[roomCode] = {
                 players: [],
@@ -86,9 +91,11 @@ app.get("/connected-sockets", (req, res) => {
 
 app.get("/rooms/:id", (req, res) => {
     const roomCode = req.params.id;
-    // console.log(rooms);
-    // rooms["AAAA"].push("test");
-    res.json(rooms[roomCode]);
+    if (rooms.hasOwnProperty(roomCode)) {
+        res.json(rooms[roomCode]);
+    } else {
+        res.status(404).json({ error: "Room not found" });
+    }
 });
 
 server.listen(config.PORT, () => {

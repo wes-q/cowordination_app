@@ -1,7 +1,7 @@
-import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { socket } from "../socket";
+import axios from "axios";
 
 const LobbyPage = ({ currentUser }) => {
     const [roomCodeToJoin, setRoomCodeToJoin] = useState("");
@@ -20,21 +20,53 @@ const LobbyPage = ({ currentUser }) => {
         }
     };
 
-    const handleJoinRoom = (roomCodeToJoin) => {
-        socket.emit("joinRoom", roomCodeToJoin, currentUser);
-        navigate(`/room/${roomCodeToJoin}`);
+    const handleJoinRoom = async (roomCodeToJoin) => {
+        const roomData = await fetchRoomData(roomCodeToJoin);
+        if (roomData) {
+            if (roomData.isGameStarted) {
+                alert(`Cannot join room ${roomCodeToJoin}. Game already started`);
+            } else {
+                socket.emit("joinRoomReceived", roomCodeToJoin, currentUser);
+                navigate(`/room/${roomCodeToJoin}`);
+            }
+        } else {
+            alert(`Cannot join room ${roomCodeToJoin}. Room does not exist`);
+        }
+    };
+
+    const fetchRoomData = async (roomCode) => {
+        try {
+            const response = await axios.get(`http://localhost:3002/rooms/${roomCode}`, { "Content-Type": "application/json" });
+            return response.data;
+        } catch (error) {
+            if (error.response && error.response.status === 404) {
+                console.log("Room not found");
+            } else {
+                console.log("Error fetching room data:", error.message);
+            }
+            return false;
+        }
     };
 
     const handleCreateRoom = () => {
         const generatedRoomCode = generateRoomCode();
-        socket.emit("joinRoom", generatedRoomCode, currentUser);
+        socket.emit("joinRoomReceived", generatedRoomCode, currentUser);
         // TODO: handle duplicate room codes here
         navigate(`/room/${generatedRoomCode}`);
     };
 
-    function generateRoomCode() {
+    const generateRoomCode = () => {
         return Math.random().toString(36).substr(2, 4).toUpperCase();
-    }
+    };
+
+    // const fetchPlayersInRoom = async (roomCode) => {
+    //     try {
+    //         const playersInRoom = await axios.get(`http://localhost:3002/rooms/${roomCode}`, { "Content-Type": "application/json" });
+    //         setPlayers(playersInRoom.data);
+    //     } catch (error) {
+    //         console.log(error);
+    //     }
+    // };
 
     return (
         <>

@@ -12,6 +12,34 @@ const App = () => {
     const [currentUser, setCurrentUser] = useState("");
     const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
 
+    const [players, setPlayers] = useState([]);
+    const [isGameStarted, setIsGameStarted] = useState(false);
+
+    useEffect(() => {
+        socket.on("broadcastSent", (message) => {
+            console.log("Broadcasted message:", message);
+        });
+        socket.on("updatePlayerList", (updatedPlayers) => {
+            console.log("UPDATED PLAYER LIST");
+            setPlayers(updatedPlayers);
+        });
+        socket.on("startGameSent", () => {
+            console.log("Started Game");
+            setIsGameStarted(true);
+        });
+        socket.on("endGameSent", () => {
+            console.log("Ended Game");
+            setIsGameStarted(false);
+        });
+
+        return () => {
+            socket.off("broadcastSent");
+            socket.off("updatePlayerList");
+            socket.off("startGameSent");
+            socket.off("endGameSent");
+        };
+    }, []);
+
     useEffect(() => {
         socket.on("connect", () => {
             setIsConnected(true);
@@ -44,7 +72,7 @@ const App = () => {
             <>
                 <Route element={isUserLoggedIn ? <PrivateRoutes isUserLoggedIn={isUserLoggedIn} /> : <LoginPage />}>
                     <Route index element={<LobbyPage currentUser={currentUser} />} />
-                    <Route path="room/:roomCode" element={<RoomPage currentUser={currentUser} />} />
+                    <Route path="room/:roomCode" element={<RoomPage currentUser={currentUser} players={players} isGameStarted={isGameStarted} />} />
                 </Route>
                 <Route path="*" element={<NotFoundPage />} />
                 <Route path="login" element={<LoginPage />} />
