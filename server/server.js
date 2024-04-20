@@ -33,11 +33,8 @@ io.on("connection", (socket) => {
     socket.on("joinRoomReceived", (roomCode, currentUser) => {
         socket.join(roomCode);
         initializeRoomIfNotExisting(roomCode);
-
-        if (isPlayerInRoomExisting(roomCode, currentUser)) {
-            addPlayerToRoom(roomCode, currentUser);
-            io.to(roomCode).emit("updatePlayerList", rooms[roomCode].players);
-        }
+        addPlayerToRoom(roomCode, currentUser);
+        io.to(roomCode).emit("updatePlayerList", rooms[roomCode].players);
         console.log(`User ${currentUser} joined ${roomCode}`);
     });
 

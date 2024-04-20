@@ -2,8 +2,12 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { socket } from "../socket";
 import PlayersInRoom from "../components/PlayersInRoom";
+import { IoSettingsOutline } from "react-icons/io5";
+import { IconContext } from "react-icons";
+import Settings from "../components/Settings";
 
 const RoomPage = ({ currentUser, players, isGameStarted }) => {
+    const [showSettings, setShowSettings] = useState(false);
     const { roomCode } = useParams();
     const navigate = useNavigate();
 
@@ -23,6 +27,10 @@ const RoomPage = ({ currentUser, players, isGameStarted }) => {
 
     const handleEndGame = () => {
         socket.emit("endGameReceived", roomCode);
+    };
+
+    const handleShowSettings = () => {
+        setShowSettings(true);
     };
 
     return (
@@ -49,6 +57,12 @@ const RoomPage = ({ currentUser, players, isGameStarted }) => {
             <div className="flex flex-col">
                 <PlayersInRoom players={players} />
             </div>
+            <IconContext.Provider value={{ className: "global-class-name cursor-pointer", size: "25px" }}>
+                <div>
+                    <IoSettingsOutline onClick={handleShowSettings} />
+                </div>
+            </IconContext.Provider>
+            {showSettings && <Settings setShowSettings={setShowSettings} />}
         </div>
     );
 };
