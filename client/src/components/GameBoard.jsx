@@ -1,9 +1,27 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const GameBoard = ({ randomWords, wordsToGuess }) => {
-    const [submitButtonCSS, setSubmitButtonCSS] = useState("bg-neutral hover:cursor-not-allowed"); // State to manage the background color
-    const [isDisabled, setIsDisabled] = useState(true);
-    const [selectedButtons, setSelectedButtons] = useState(Object.fromEntries(randomWords.map((word) => [word, false])));
+    const [isSubmitted, setIsSubmitted] = useState(false);
+    const [isReadyForSubmission, setIsReadyForSubmission] = useState(false);
+    const [selectedButtons, setSelectedButtons] = useState({});
+    const submittedButtonCSS = useRef(`bg-green-400 text-white hover:cursor-not-allowed ml-2 w-44 mt-4 hover:ring-cyan-500 hover:ring-1 hover:shadow-md text-white font-bold py-2 px-4 rounded focus:outline-none mr-2 transition-all`);
+    const readyForSubmissionButtonCSS = useRef(`bg-primary dark:bg-primaryDark ml-2 w-44 mt-4 hover:ring-cyan-500 hover:ring-1 hover:shadow-md text-white font-bold py-2 px-4 rounded focus:outline-none mr-2 transition-all`);
+    const notReadyForSubmissionButtonCSS = useRef(`bg-neutral text-white hover:cursor-not-allowed dark:bg-primaryDark ml-2 w-44 mt-4 hover:ring-cyan-500 hover:ring-1 hover:shadow-md text-white font-bold py-2 px-4 rounded focus:outline-none mr-2 transition-all`);
+
+    // Converts randomwords array into object {word: boolean} where boolean = isSelected
+    useEffect(() => {
+        setSelectedButtons(Object.fromEntries(randomWords.map((word) => [word, false])));
+    }, [randomWords]);
+
+    // Sets the css and disabled property of the submit button depending on condition (if the user selected the correct number of words to guess)
+    useEffect(() => {
+        const selectedCount = Object.values(selectedButtons).filter(Boolean).length;
+        if (selectedCount === wordsToGuess) {
+            setIsReadyForSubmission(true);
+        } else {
+            setIsReadyForSubmission(false);
+        }
+    }, [selectedButtons]);
 
     const toggleButton = (buttonName) => {
         setSelectedButtons({
@@ -12,16 +30,9 @@ const GameBoard = ({ randomWords, wordsToGuess }) => {
         });
     };
 
-    useEffect(() => {
-        const selectedCount = Object.values(selectedButtons).filter(Boolean).length;
-        if (selectedCount === wordsToGuess) {
-            setSubmitButtonCSS("bg-primary dark:bg-primaryDark");
-            setIsDisabled(false);
-        } else {
-            setSubmitButtonCSS("bg-neutral text-white hover:cursor-not-allowed");
-            setIsDisabled(true);
-        }
-    }, [selectedButtons]);
+    const handleSubmit = () => {
+        setIsSubmitted(true);
+    };
 
     return (
         <div className="relative z-10 select-none">
@@ -36,13 +47,13 @@ const GameBoard = ({ randomWords, wordsToGuess }) => {
                     <hr className="w-full border-t border-light-c dark:border-dark-a mb-4" />
                     <div className="grid grid-cols-2 gap-4">
                         {randomWords.map((buttonName) => (
-                            <button key={buttonName} className={selectedButtons[buttonName] ? "rounded-md border border-orange-400" : ""} onClick={() => toggleButton(buttonName)}>
+                            <button key={buttonName} className={selectedButtons[buttonName] ? "rounded-md border border-orange-400 bg-orange-400 text-white py-10 disabled:cursor-not-allowed" : "rounded-md border border-orange-400 py-10 disabled:cursor-not-allowed"} onClick={() => toggleButton(buttonName)} disabled={isSubmitted}>
                                 {buttonName}
                             </button>
                         ))}
                     </div>
-                    <button className={`${submitButtonCSS} ml-2 w-44 mt-4 hover:ring-cyan-500 hover:ring-1 hover:shadow-md text-white font-bold py-2 px-4 rounded focus:outline-none mr-2 transition-all`} type="button" disabled={isDisabled}>
-                        Submit
+                    <button onClick={handleSubmit} className={isSubmitted ? submittedButtonCSS.current : isReadyForSubmission ? readyForSubmissionButtonCSS.current : notReadyForSubmissionButtonCSS.current} type="button" disabled={isSubmitted ? true : isReadyForSubmission ? false : true}>
+                        {isSubmitted ? "Submitted" : "Submit"}
                     </button>
                 </div>
             </div>
