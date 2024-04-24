@@ -59,15 +59,6 @@ const LobbyPage = ({ currentUser }) => {
         return Math.random().toString(36).substr(2, 4).toUpperCase();
     };
 
-    // const fetchPlayersInRoom = async (roomCode) => {
-    //     try {
-    //         const playersInRoom = await axios.get(`http://localhost:3002/rooms/${roomCode}`, { "Content-Type": "application/json" });
-    //         setPlayers(playersInRoom.data);
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // };
-
     return (
         <>
             <h1>Lobby Page</h1>

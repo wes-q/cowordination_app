@@ -1,12 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { socket } from "../socket";
 import PlayersInRoom from "../components/PlayersInRoom";
-import { IoSettingsOutline } from "react-icons/io5";
-import { IconContext } from "react-icons";
-import Settings from "../components/Settings";
+import ModalSettings from "../components/ModalSettings";
+import GameBoard from "../components/GameBoard";
 
-const RoomPage = ({ currentUser, players, isGameStarted }) => {
+const RoomPage = ({ currentUser, players, isGameStarted, randomWords, wordsToGuess }) => {
     const [showSettings, setShowSettings] = useState(false);
     const { roomCode } = useParams();
     const navigate = useNavigate();
@@ -19,10 +18,6 @@ const RoomPage = ({ currentUser, players, isGameStarted }) => {
 
     const handleBroadcast = () => {
         socket.emit("broadcastReceived", roomCode, currentUser);
-    };
-
-    const handleStartGame = () => {
-        socket.emit("startGameReceived", roomCode);
     };
 
     const handleEndGame = () => {
@@ -48,7 +43,7 @@ const RoomPage = ({ currentUser, players, isGameStarted }) => {
                         End Game
                     </button>
                 ) : (
-                    <button className="ml-2 w-96 bg-cyan-400 hover:ring-cyan-500 hover:ring-1 hover:shadow-md text-white font-bold py-2 px-4 rounded focus:outline-none mr-2 transition-all" type="button" onClick={() => handleStartGame(roomCode)}>
+                    <button className="ml-2 w-96 bg-cyan-400 hover:ring-cyan-500 hover:ring-1 hover:shadow-md text-white font-bold py-2 px-4 rounded focus:outline-none mr-2 transition-all" type="button" onClick={handleShowSettings}>
                         Start Game
                     </button>
                 )}
@@ -57,12 +52,8 @@ const RoomPage = ({ currentUser, players, isGameStarted }) => {
             <div className="flex flex-col">
                 <PlayersInRoom players={players} />
             </div>
-            <IconContext.Provider value={{ className: "global-class-name cursor-pointer", size: "25px" }}>
-                <div>
-                    <IoSettingsOutline onClick={handleShowSettings} />
-                </div>
-            </IconContext.Provider>
-            {showSettings && <Settings setShowSettings={setShowSettings} />}
+            {showSettings && <ModalSettings setShowSettings={setShowSettings} roomCode={roomCode} />}
+            {isGameStarted && <GameBoard randomWords={randomWords} wordsToGuess={wordsToGuess} />}
         </div>
     );
 };
