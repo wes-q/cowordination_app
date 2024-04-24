@@ -5,7 +5,8 @@ import PlayersInRoom from "../components/PlayersInRoom";
 import ModalSettings from "../components/ModalSettings";
 import GameBoard from "../components/GameBoard";
 
-const RoomPage = ({ currentUser, players, isGameStarted, randomWords, wordsToGuess }) => {
+const RoomPage = ({ currentUser, players, randomWords, wordsToGuess }) => {
+    const [isGameStarted, setIsGameStarted] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
     const { roomCode } = useParams();
     const navigate = useNavigate();
@@ -52,8 +53,8 @@ const RoomPage = ({ currentUser, players, isGameStarted, randomWords, wordsToGue
             <div className="flex flex-col">
                 <PlayersInRoom players={players} />
             </div>
-            {showSettings && <ModalSettings setShowSettings={setShowSettings} roomCode={roomCode} />}
-            {isGameStarted && <GameBoard randomWords={randomWords} wordsToGuess={wordsToGuess} />}
+            {showSettings && <ModalSettings setShowSettings={setShowSettings} roomCode={roomCode} setIsGameStarted={setIsGameStarted} />}
+            {isGameStarted && <GameBoard randomWords={randomWords} wordsToGuess={wordsToGuess} players={players} />}
         </div>
     );
 };

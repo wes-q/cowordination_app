@@ -5,7 +5,7 @@ import { FaAngleLeft } from "react-icons/fa6";
 import { FaAngleRight } from "react-icons/fa6";
 import { socket } from "../socket";
 
-const ModalSettings = ({ setShowSettings, roomCode }) => {
+const ModalSettings = ({ setShowSettings, roomCode, setIsGameStarted }) => {
     const [totalWords, setTotalWords] = useState(10);
     const [clues, setClues] = useState(2);
     const [wordsToGuess, setWordsToGuess] = useState(2);
@@ -16,7 +16,9 @@ const ModalSettings = ({ setShowSettings, roomCode }) => {
 
     const handleStartGame = (roomCode) => {
         handleClose();
+        setIsGameStarted(true);
         socket.emit("startGameReceived", roomCode, totalWords, clues, wordsToGuess);
+        console.log("Emitted startGameReceived");
     };
 
     return (

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
+import PlayersInGame from "./PlayersInGame";
 
-const GameBoard = ({ randomWords, wordsToGuess }) => {
+const GameBoard = ({ randomWords, wordsToGuess, players }) => {
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [isReadyForSubmission, setIsReadyForSubmission] = useState(false);
     const [selectedButtons, setSelectedButtons] = useState({});
@@ -55,6 +56,7 @@ const GameBoard = ({ randomWords, wordsToGuess }) => {
                     <button onClick={handleSubmit} className={isSubmitted ? submittedButtonCSS.current : isReadyForSubmission ? readyForSubmissionButtonCSS.current : notReadyForSubmissionButtonCSS.current} type="button" disabled={isSubmitted ? true : isReadyForSubmission ? false : true}>
                         {isSubmitted ? "Submitted" : "Submit"}
                     </button>
+                    <PlayersInGame players={players} />
                 </div>
             </div>
         </div>

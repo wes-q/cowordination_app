@@ -8,20 +8,49 @@ const cors = require("cors");
 const fs = require("fs");
 
 let rooms = {}; // stores players array and in a room and its status {"players":["user1","user2","user3"],"isGameStarted":false}
-let gameState = {}; // several games can be created in a single room
+let gameState = {}; // stores scores for each finished round, several games can be created in a single room
+/* gameState sample
+{
+    "totalWords": 10,
+    "clues": 2,
+    "wordsToGuess": 1,
+    "finishedRoundScores": [
+        {
+            "round": 1,
+            "scores": [
+                { "player": "playerA", "score": 3 },
+                { "player": "playerB", "score": 2 }
+            ]
+        },
+        {
+            "round": 2,
+            "scores": [
+                { "player": "playerA", "score": 0 },
+                { "player": "playerB", "score": 1 }
+            ]
+        }
+    ]
+}
+
+*/
+let roundState = {}; // several rounds can be played in a single game
+/* roundState sample
+{
+    "totalWords": 10,
+    "clues": 2,
+    "wordsToGuess": 1,
+    "randomWords": ["BUNNY", "LASER", "APPLE", "MUFFIN", "GLASS"],
+    "isGameStarted": true,
+    "submissions": [
+        { "player": "playerA", "words": ["BUNNY"] },
+        { "player": "playerB", "words": ["LASER"] }
+    ]
+}
+*/
 
 let fileContent = fs.readFileSync("./words_alpha.txt", "utf-8");
 const wordsArray = fileContent.split("\r\n").filter(Boolean); // filter(Boolean) removes empty lines
 
-/*
-{
-    "totalWords": 10, 
-    "clues": 2, 
-    "wordsToGuess": 1,
-    "randomWords" : [BUNNY, LASER, APPLE, MUFFIN, GLASS]
-
-}
-*/
 const DEFAULTTOTALWORDS = 10;
 const DEFAULTCLUES = 2;
 const DEFAULTWORDSTOGUESS = 2;
@@ -72,12 +101,12 @@ io.on("connection", (socket) => {
 
     socket.on("startGameReceived", (roomCode, totalWords, clues, wordsToGuess) => {
         rooms[roomCode].isGameStarted = true;
-
-        initializeGame(roomCode, totalWords, clues, wordsToGuess);
-
+        const gameID = initializeGame(totalWords, clues, wordsToGuess);
+        console.log(`Game started with ID ${gameID}`);
+        const roundID = initializeRound(gameID, totalWords, clues, wordsToGuess);
+        console.log(`Round started with ID ${roundID}`);
         io.to(roomCode).emit("startGameSent");
-        io.to(roomCode).emit("updateUI", gameState[1]);
-        console.log(`Game started on room ${roomCode}`);
+        io.to(roomCode).emit("updateUI", gameState[gameID], roundState[roundID]);
     });
 
     socket.on("endGameReceived", (roomCode) => {
@@ -98,27 +127,45 @@ io.on("connection", (socket) => {
                 totalWords: DEFAULTTOTALWORDS,
                 clues: DEFAULTCLUES,
                 wordsToGuess: DEFAULTWORDSTOGUESS,
-                randomWords: [],
+                randomWords: [], // TODO remove
             };
         }
     };
 
-    const initializeGame = (roomCode, totalWords, clues, wordsToGuess) => {
-        const gameID = 1; // TODO autoincrement
-        const shuffledArray = shuffleArray(wordsArray);
-        const randomWordsArray = shuffledArray.slice(0, totalWords);
-        // const randomWordsObject = randomWordsArray.map((word, index) => ({
-        //     [word]: false,
-        // }));
-        console.log(randomWordsArray);
-
+    const initializeGame = (totalWords, clues, wordsToGuess) => {
+        const gameID = generateGameID();
         gameState[gameID] = {
-            randomWords: randomWordsArray,
-            isGameStarted: true,
             totalWords: totalWords,
             clues: clues,
             wordsToGuess: wordsToGuess,
+            finishedRoundScores: [],
         };
+        return gameID;
+    };
+
+    const initializeRound = (gameID, totalWords, clues, wordsToGuess) => {
+        const latestRound = gameState[gameID].finishedRoundScores.reduce((maxRound, roundData) => {
+            return Math.max(maxRound, roundData.round);
+        }, 0);
+
+        const roundID = latestRound + 1;
+
+        const shuffledArray = shuffleArray(wordsArray);
+        const randomWordsArray = shuffledArray.slice(0, totalWords);
+        console.log(randomWordsArray);
+
+        if (!roundState[roundID]) {
+            roundState[roundID] = {
+                totalWords: totalWords,
+                clues: clues,
+                wordsToGuess: wordsToGuess,
+                randomWords: randomWordsArray,
+                isGameStarted: true,
+                submissions: [],
+            };
+        }
+
+        return roundID;
     };
 
     const isPlayerInRoomExisting = (roomCode, currentUser) => {
@@ -160,6 +207,15 @@ app.get("/games/:id", (req, res) => {
     }
 });
 
+app.get("/rounds/:id", (req, res) => {
+    const roundID = req.params.id;
+    if (roundState.hasOwnProperty(roundID)) {
+        res.json(roundState[roundID]);
+    } else {
+        res.status(404).json({ error: "Round not found" });
+    }
+});
+
 server.listen(config.PORT, () => {
     console.log(`Server is running on http://localhost:${config.PORT}`);
 });
@@ -171,3 +227,7 @@ function shuffleArray(array) {
     }
     return array;
 }
+
+const generateGameID = () => {
+    return Math.random().toString(36).substr(2, 4).toUpperCase();
+};

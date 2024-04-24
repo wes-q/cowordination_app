@@ -1,6 +1,6 @@
 const PlayersInRoom = ({ players }) => {
     return (
-        <div className="border h-full w-96">
+        <div className="border h-full w-96 text-left">
             <h1>Players in Room:</h1>
             <ul>
                 {players.map((player, index) => {

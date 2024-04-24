@@ -6,7 +6,6 @@ import RoomPage from "./pages/RoomPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import LoginPage from "./pages/LoginPage";
 import { socket } from "./socket";
-import GameBoard from "./components/GameBoard";
 
 const App = () => {
     const [isConnected, setIsConnected] = useState(false);
@@ -26,26 +25,26 @@ const App = () => {
             console.log("UPDATED PLAYER LIST");
             setPlayers(updatedPlayers);
         });
-        socket.on("startGameSent", () => {
-            console.log("Started Game");
-            setIsGameStarted(true);
-        });
-        socket.on("endGameSent", () => {
-            console.log("Ended Game");
-            setIsGameStarted(false);
-        });
-        socket.on("updateUI", (gameState) => {
+        // socket.on("startGameSent", () => {
+        //     console.log("Started Game");
+        //     setIsGameStarted(true);
+        // });
+        // socket.on("endGameSent", () => {
+        //     console.log("Ended Game");
+        //     setIsGameStarted(false);
+        // });
+        socket.on("updateUI", (gameState, roundState) => {
             console.log("Update UI Sent");
-            console.log(gameState.randomWords);
-            setRandomWords(gameState.randomWords);
+            console.log(roundState.randomWords);
+            setRandomWords(roundState.randomWords);
             setWordsToGuess(gameState.wordsToGuess);
         });
 
         return () => {
             socket.off("broadcastSent");
             socket.off("updatePlayerList");
-            socket.off("startGameSent");
-            socket.off("endGameSent");
+            // socket.off("startGameSent");
+            // socket.off("endGameSent");
             socket.off("updateUI");
         };
     }, []);
@@ -82,7 +81,7 @@ const App = () => {
             <>
                 <Route element={isUserLoggedIn ? <PrivateRoutes isUserLoggedIn={isUserLoggedIn} /> : <LoginPage />}>
                     <Route index element={<LobbyPage currentUser={currentUser} />} />
-                    <Route path="room/:roomCode" element={<RoomPage currentUser={currentUser} players={players} isGameStarted={isGameStarted} randomWords={randomWords} wordsToGuess={wordsToGuess} />} />
+                    <Route path="room/:roomCode" element={<RoomPage currentUser={currentUser} players={players} randomWords={randomWords} wordsToGuess={wordsToGuess} />} />
                 </Route>
                 <Route path="*" element={<NotFoundPage />} />
                 <Route path="login" element={<LoginPage />} />
