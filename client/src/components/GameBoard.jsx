@@ -38,8 +38,8 @@ const GameBoard = ({ randomWords, wordsToGuess, players, currentUser, roomCode, 
 
     // Sets the css and disabled property of the submit button depending on condition (if the user selected the correct number of words to guess)
     useEffect(() => {
-        // const selectedCount = Object.values(selectedButtons).filter(Boolean).length;
-        const selectedCount = Object.entries(selectedButtons).filter(([word, data]) => data.isSelected).length;
+        const selectedCount = Object.values(selectedButtons).filter(Boolean).length;
+        // const selectedCount = Object.entries(selectedButtons).filter(([word, data]) => data.isSelected).length;
 
         if (selectedCount === wordsToGuess) {
             setIsReadyForSubmission(true);
