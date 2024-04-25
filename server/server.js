@@ -14,38 +14,25 @@ let gameState = {}; // stores scores for each finished round, several games can 
     "totalWords": 10,
     "clues": 2,
     "wordsToGuess": 1,
-    "finishedRoundScores": [
+    "rounds": [
         {
             "round": 1,
-            "scores": [
-                { "player": "playerA", "score": 3 },
-                { "player": "playerB", "score": 2 }
+            "randomWords": ["BUNNY", "LASER", "APPLE", "MUFFIN", "GLASS"],
+            "submissions": [
+                { "player": "playerA", "words": ["BUNNY"] },
+                { "player": "playerB", "words": ["LASER"] }
             ]
         },
         {
             "round": 2,
-            "scores": [
-                { "player": "playerA", "score": 0 },
-                { "player": "playerB", "score": 1 }
+            "randomWords": ["MELON", "ORANGE", "APPLE", "GRAPE", "KIWI"],
+            "submissions": [
+                { "player": "playerA", "words": ["APPLE"] },
+                { "player": "playerB", "words": ["ORANGE"] }
             ]
         }
     ]
-}
-
-*/
-let roundState = {}; // several rounds can be played in a single game
-/* roundState sample
-{
-    "totalWords": 10,
-    "clues": 2,
-    "wordsToGuess": 1,
-    "randomWords": ["BUNNY", "LASER", "APPLE", "MUFFIN", "GLASS"],
-    "isGameStarted": true,
-    "submissions": [
-        { "player": "playerA", "words": ["BUNNY"] },
-        { "player": "playerB", "words": ["LASER"] }
-    ]
-}
+};
 */
 
 let fileContent = fs.readFileSync("./words_alpha.txt", "utf-8");
@@ -98,15 +85,33 @@ io.on("connection", (socket) => {
         io.to(roomCode).emit("broadcastSent", `${currentUser} says "Hello World!" to everybody`);
         console.log(`broadcast received by server ${roomCode} ${currentUser}`);
     });
-
     socket.on("startGameReceived", (roomCode, totalWords, clues, wordsToGuess) => {
         rooms[roomCode].isGameStarted = true;
         const gameID = initializeGame(totalWords, clues, wordsToGuess);
         console.log(`Game started with ID ${gameID}`);
-        const roundID = initializeRound(gameID, totalWords, clues, wordsToGuess);
-        console.log(`Round started with ID ${roundID}`);
-        io.to(roomCode).emit("startGameSent");
-        io.to(roomCode).emit("updateUI", gameState[gameID], roundState[roundID]);
+        const currentRound = initializeRound(gameID, totalWords, clues, wordsToGuess);
+        console.log(`Started round ${currentRound}`);
+        io.to(roomCode).emit("updateUI", rooms[roomCode].isGameStarted, gameState, gameID, currentRound);
+    });
+
+    socket.on("SubmitAnswerReceived", (selectedWords, currentUser, roomCode, currentGameID, currentRound) => {
+        console.log(`Submit answer received from ${currentUser}`);
+        const submissionObject = {
+            player: currentUser,
+            words: selectedWords,
+        };
+        gameState[currentGameID].rounds[currentRound - 1].submissions.push(submissionObject);
+
+        // Check if everyone already submitted
+        if (checkIfEveryoneSubmitted(roomCode, currentGameID, currentRound)) {
+            // fetch all answers from other players
+            // const otherPlayersSubmissionsArray = fetchOtherPlayersSubmissions(currentUser, currentGameID, currentRound);
+            // console.log(otherPlayersSubmissionsArray);
+            io.to(roomCode).emit("returnAnswersSent", gameState, currentGameID, currentRound);
+        }
+
+        // Emit update UI to reflect that the client who sent already submitted.
+        // socket.emit()
     });
 
     socket.on("endGameReceived", (roomCode) => {
@@ -124,7 +129,7 @@ io.on("connection", (socket) => {
             rooms[roomCode] = {
                 players: [],
                 isGameStarted: false,
-                totalWords: DEFAULTTOTALWORDS,
+                totalWords: DEFAULTTOTALWORDS, // TODO REMOVE
                 clues: DEFAULTCLUES,
                 wordsToGuess: DEFAULTWORDSTOGUESS,
                 randomWords: [], // TODO remove
@@ -138,34 +143,25 @@ io.on("connection", (socket) => {
             totalWords: totalWords,
             clues: clues,
             wordsToGuess: wordsToGuess,
-            finishedRoundScores: [],
+            rounds: [],
         };
         return gameID;
     };
 
     const initializeRound = (gameID, totalWords, clues, wordsToGuess) => {
-        const latestRound = gameState[gameID].finishedRoundScores.reduce((maxRound, roundData) => {
-            return Math.max(maxRound, roundData.round);
-        }, 0);
-
-        const roundID = latestRound + 1;
-
+        const latestRound = gameState[gameID].rounds.length;
+        const newRound = latestRound + 1;
         const shuffledArray = shuffleArray(wordsArray);
         const randomWordsArray = shuffledArray.slice(0, totalWords);
-        console.log(randomWordsArray);
 
-        if (!roundState[roundID]) {
-            roundState[roundID] = {
-                totalWords: totalWords,
-                clues: clues,
-                wordsToGuess: wordsToGuess,
-                randomWords: randomWordsArray,
-                isGameStarted: true,
-                submissions: [],
-            };
-        }
+        const newRoundObject = {
+            round: newRound,
+            randomWords: randomWordsArray,
+            submissions: [],
+        };
 
-        return roundID;
+        gameState[gameID].rounds.push(newRoundObject);
+        return newRound;
     };
 
     const isPlayerInRoomExisting = (roomCode, currentUser) => {
@@ -231,3 +227,18 @@ function shuffleArray(array) {
 const generateGameID = () => {
     return Math.random().toString(36).substr(2, 4).toUpperCase();
 };
+
+const checkIfEveryoneSubmitted = (roomCode, gameID, currentRound) => {
+    const numberOfPlayersSubmitted = gameState[gameID].rounds[currentRound - 1].submissions.length;
+    const numberOfPlayersInRoom = rooms[roomCode].players.length;
+    if (numberOfPlayersInRoom === numberOfPlayersSubmitted) {
+        return true;
+    } else {
+        return false;
+    }
+};
+
+// const fetchOtherPlayersSubmissions = (currentUser, gameID, currentRound) => {
+//     const otherPlayersSubmissionsArray = gameState[gameID].rounds[currentRound - 1].submissions.filter((submission) => submission.player !== currentUser);
+//     return otherPlayersSubmissionsArray;
+// };

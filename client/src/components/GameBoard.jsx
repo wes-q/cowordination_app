@@ -1,10 +1,26 @@
 import { useState, useEffect, useRef } from "react";
 import PlayersInGame from "./PlayersInGame";
+import { socket } from "../socket";
 
-const GameBoard = ({ randomWords, wordsToGuess, players }) => {
+const GameBoard = ({ randomWords, wordsToGuess, players, currentUser, roomCode, currentGameID, currentRound, allSubmissionsForCurrentRound }) => {
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [isReadyForSubmission, setIsReadyForSubmission] = useState(false);
     const [selectedButtons, setSelectedButtons] = useState({});
+    // const wordData = {
+    //     "quirked": {
+    //         isSelected: false,
+    //         answeredBy: []
+    //     },
+    //     "steenstrupine": {
+    //         isSelected: false,
+    //         answeredBy: []
+    //     },
+    //     "taffylike": {
+    //         isSelected: false,
+    //         answeredBy: []
+    //     },
+    // };
+
     const submittedButtonCSS = useRef(`bg-green-400 text-white hover:cursor-not-allowed ml-2 w-44 mt-4 hover:ring-cyan-500 hover:ring-1 hover:shadow-md text-white font-bold py-2 px-4 rounded focus:outline-none mr-2 transition-all`);
     const readyForSubmissionButtonCSS = useRef(`bg-primary dark:bg-primaryDark ml-2 w-44 mt-4 hover:ring-cyan-500 hover:ring-1 hover:shadow-md text-white font-bold py-2 px-4 rounded focus:outline-none mr-2 transition-all`);
     const notReadyForSubmissionButtonCSS = useRef(`bg-neutral text-white hover:cursor-not-allowed dark:bg-primaryDark ml-2 w-44 mt-4 hover:ring-cyan-500 hover:ring-1 hover:shadow-md text-white font-bold py-2 px-4 rounded focus:outline-none mr-2 transition-all`);
@@ -12,11 +28,19 @@ const GameBoard = ({ randomWords, wordsToGuess, players }) => {
     // Converts randomwords array into object {word: boolean} where boolean = isSelected
     useEffect(() => {
         setSelectedButtons(Object.fromEntries(randomWords.map((word) => [word, false])));
+        // setSelectedButtons(Object.fromEntries(randomWords.map((word) => [word, { isSelected: false, answeredBy: [] }])));
     }, [randomWords]);
+
+    // useEffect(() => {
+    //     // setSelectedButtons(Object.fromEntries(randomWords.map((word) => [word, false])));
+    //     setSelectedButtons(Object.fromEntries(randomWords.map((word) => [word, { isSelected: false, answeredBy: [] }])));
+    // }, [allSubmissionsForCurrentRound]);
 
     // Sets the css and disabled property of the submit button depending on condition (if the user selected the correct number of words to guess)
     useEffect(() => {
-        const selectedCount = Object.values(selectedButtons).filter(Boolean).length;
+        // const selectedCount = Object.values(selectedButtons).filter(Boolean).length;
+        const selectedCount = Object.entries(selectedButtons).filter(([word, data]) => data.isSelected).length;
+
         if (selectedCount === wordsToGuess) {
             setIsReadyForSubmission(true);
         } else {
@@ -31,8 +55,23 @@ const GameBoard = ({ randomWords, wordsToGuess, players }) => {
         });
     };
 
+    // const toggleButton = (word) => {
+    //     setSelectedButtons({
+    //         ...selectedButtons,
+    //         [word]: {
+    //             ...selectedButtons[word],
+    //             isSelected: !selectedButtons[word]?.isSelected,
+    //         },
+    //     });
+    // };
+
     const handleSubmit = () => {
         setIsSubmitted(true);
+        const selectedWords = Object.entries(selectedButtons)
+            .filter(([word, isSelected]) => isSelected)
+            .map(([word]) => word);
+        socket.emit("SubmitAnswerReceived", selectedWords, currentUser, roomCode, currentGameID, currentRound);
+        console.log(`Submitted answer to server ${selectedWords}`);
     };
 
     return (

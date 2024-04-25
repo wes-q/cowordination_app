@@ -16,6 +16,9 @@ const App = () => {
     const [isGameStarted, setIsGameStarted] = useState(false);
     const [randomWords, setRandomWords] = useState([]);
     const [wordsToGuess, setWordsToGuess] = useState(0);
+    const [currentGameID, setCurrentGameID] = useState("");
+    const [currentRound, setCurrentRound] = useState(0);
+    const [allSubmissionsForCurrentRound, setAllSubmissionsForCurrentRound] = useState([]);
 
     useEffect(() => {
         socket.on("broadcastSent", (message) => {
@@ -25,26 +28,29 @@ const App = () => {
             console.log("UPDATED PLAYER LIST");
             setPlayers(updatedPlayers);
         });
-        // socket.on("startGameSent", () => {
-        //     console.log("Started Game");
-        //     setIsGameStarted(true);
-        // });
-        // socket.on("endGameSent", () => {
-        //     console.log("Ended Game");
-        //     setIsGameStarted(false);
-        // });
-        socket.on("updateUI", (gameState, roundState) => {
+
+        socket.on("updateUI", (isGameStarted, gameState, currentGameID, currentRound) => {
+            console.log(currentRound);
+            setCurrentRound(currentRound);
+            setCurrentGameID(currentGameID);
+
+            const randomWords = gameState[currentGameID].rounds[currentRound - 1].randomWords;
+
             console.log("Update UI Sent");
-            console.log(roundState.randomWords);
-            setRandomWords(roundState.randomWords);
-            setWordsToGuess(gameState.wordsToGuess);
+            console.log(randomWords);
+            setRandomWords(randomWords);
+            setWordsToGuess(gameState[currentGameID].wordsToGuess);
+            setIsGameStarted(isGameStarted);
+        });
+        socket.on("returnAnswersSent", (gameState, currentGameID, currentRound) => {
+            console.log("returnAnswersSent");
+            // const otherPlayersSubmissionsArray = gameState[currentGameID].rounds[currentRound - 1].submissions.filter((submission) => submission.player !== currentUser);
+            setAllSubmissionsForCurrentRound(gameState[currentGameID].rounds[currentRound - 1].submissions);
         });
 
         return () => {
             socket.off("broadcastSent");
             socket.off("updatePlayerList");
-            // socket.off("startGameSent");
-            // socket.off("endGameSent");
             socket.off("updateUI");
         };
     }, []);
@@ -66,7 +72,7 @@ const App = () => {
 
     useEffect(() => {
         getLocalUserFromBrowser();
-    }, []);
+    }, [currentUser]);
 
     const getLocalUserFromBrowser = () => {
         const loggedUserName = window.localStorage.getItem("loggedUserName");
@@ -81,7 +87,7 @@ const App = () => {
             <>
                 <Route element={isUserLoggedIn ? <PrivateRoutes isUserLoggedIn={isUserLoggedIn} /> : <LoginPage />}>
                     <Route index element={<LobbyPage currentUser={currentUser} />} />
-                    <Route path="room/:roomCode" element={<RoomPage currentUser={currentUser} players={players} randomWords={randomWords} wordsToGuess={wordsToGuess} />} />
+                    <Route path="room/:roomCode" element={<RoomPage currentUser={currentUser} players={players} randomWords={randomWords} wordsToGuess={wordsToGuess} currentGameID={currentGameID} currentRound={currentRound} isGameStarted={isGameStarted} allSubmissionsForCurrentRound={allSubmissionsForCurrentRound} />} />
                 </Route>
                 <Route path="*" element={<NotFoundPage />} />
                 <Route path="login" element={<LoginPage />} />
