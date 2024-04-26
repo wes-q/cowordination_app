@@ -15,6 +15,7 @@ const App = () => {
     const [players, setPlayers] = useState([]);
     const [isGameStarted, setIsGameStarted] = useState(false);
     const [randomWords, setRandomWords] = useState([]);
+    const [randomClues, setRandomClues] = useState([]);
     const [wordsToGuess, setWordsToGuess] = useState(0);
     const [currentGameID, setCurrentGameID] = useState("");
     const [currentRound, setCurrentRound] = useState(0);
@@ -37,10 +38,12 @@ const App = () => {
             setCurrentGameID(currentGameID);
 
             const randomWords = gameState[currentGameID].rounds[currentRound - 1].randomWords;
+            const randomClues = gameState[currentGameID].rounds[currentRound - 1].randomClues;
 
             console.log("Update UI Sent");
             console.log(randomWords);
             setRandomWords(randomWords);
+            setRandomClues(randomClues);
             setWordsToGuess(gameState[currentGameID].wordsToGuess);
             setIsGameStarted(isGameStarted);
 
@@ -87,7 +90,7 @@ const App = () => {
             <>
                 <Route element={isUserLoggedIn ? <PrivateRoutes isUserLoggedIn={isUserLoggedIn} /> : <LoginPage />}>
                     <Route index element={<LobbyPage currentUser={currentUser} />} />
-                    <Route path="room/:roomCode" element={<RoomPage currentUser={currentUser} players={players} randomWords={randomWords} wordsToGuess={wordsToGuess} currentGameID={currentGameID} currentRound={currentRound} isGameStarted={isGameStarted} isSubmitted={isSubmitted} setIsSubmitted={setIsSubmitted} hasEveryoneSubmitted={hasEveryoneSubmitted} setHasEveryoneSubmitted={setHasEveryoneSubmitted} />} />
+                    <Route path="room/:roomCode" element={<RoomPage currentUser={currentUser} players={players} randomWords={randomWords} randomClues={randomClues} wordsToGuess={wordsToGuess} currentGameID={currentGameID} currentRound={currentRound} isGameStarted={isGameStarted} isSubmitted={isSubmitted} setIsSubmitted={setIsSubmitted} hasEveryoneSubmitted={hasEveryoneSubmitted} setHasEveryoneSubmitted={setHasEveryoneSubmitted} />} />
                 </Route>
                 <Route path="*" element={<NotFoundPage />} />
                 <Route path="login" element={<LoginPage />} />

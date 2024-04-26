@@ -18,6 +18,7 @@ let gameState = {}; // stores scores for each finished round, several games can 
         {
             "round": 1,
             "randomWords": ["BUNNY", "LASER", "APPLE", "MUFFIN", "GLASS"],
+            "randomClues": ["PROGRAMMING", "FRUIT"],
             "submissions": [
                 { "player": "playerA", "words": ["BUNNY"] },
                 { "player": "playerB", "words": ["LASER"] }
@@ -26,6 +27,7 @@ let gameState = {}; // stores scores for each finished round, several games can 
         {
             "round": 2,
             "randomWords": ["MELON", "ORANGE", "APPLE", "GRAPE", "KIWI"],
+            "randomClues": ["NATURAL", "SWEET"],
             "submissions": [
                 { "player": "playerA", "words": ["APPLE"] },
                 { "player": "playerB", "words": ["ORANGE"] }
@@ -164,10 +166,12 @@ io.on("connection", (socket) => {
         const newRound = latestRound + 1;
         const shuffledArray = shuffleArray(wordsArray);
         const randomWordsArray = shuffledArray.slice(0, totalWords);
+        const randomCluesArray = shuffledArray.slice(totalWords, totalWords + clues);
 
         const newRoundObject = {
             round: newRound,
             randomWords: randomWordsArray,
+            randomClues: randomCluesArray,
             submissions: [],
         };
 
