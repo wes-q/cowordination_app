@@ -18,7 +18,6 @@ const App = () => {
     const [wordsToGuess, setWordsToGuess] = useState(0);
     const [currentGameID, setCurrentGameID] = useState("");
     const [currentRound, setCurrentRound] = useState(0);
-    const [allSubmissionsForCurrentRound, setAllSubmissionsForCurrentRound] = useState([]);
 
     useEffect(() => {
         socket.on("broadcastSent", (message) => {
@@ -41,11 +40,6 @@ const App = () => {
             setRandomWords(randomWords);
             setWordsToGuess(gameState[currentGameID].wordsToGuess);
             setIsGameStarted(isGameStarted);
-        });
-        socket.on("returnAnswersSent", (gameState, currentGameID, currentRound) => {
-            console.log("returnAnswersSent");
-            // const otherPlayersSubmissionsArray = gameState[currentGameID].rounds[currentRound - 1].submissions.filter((submission) => submission.player !== currentUser);
-            setAllSubmissionsForCurrentRound(gameState[currentGameID].rounds[currentRound - 1].submissions);
         });
 
         return () => {
@@ -87,7 +81,7 @@ const App = () => {
             <>
                 <Route element={isUserLoggedIn ? <PrivateRoutes isUserLoggedIn={isUserLoggedIn} /> : <LoginPage />}>
                     <Route index element={<LobbyPage currentUser={currentUser} />} />
-                    <Route path="room/:roomCode" element={<RoomPage currentUser={currentUser} players={players} randomWords={randomWords} wordsToGuess={wordsToGuess} currentGameID={currentGameID} currentRound={currentRound} isGameStarted={isGameStarted} allSubmissionsForCurrentRound={allSubmissionsForCurrentRound} />} />
+                    <Route path="room/:roomCode" element={<RoomPage currentUser={currentUser} players={players} randomWords={randomWords} wordsToGuess={wordsToGuess} currentGameID={currentGameID} currentRound={currentRound} isGameStarted={isGameStarted} />} />
                 </Route>
                 <Route path="*" element={<NotFoundPage />} />
                 <Route path="login" element={<LoginPage />} />

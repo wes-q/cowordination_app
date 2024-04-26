@@ -5,7 +5,7 @@ import PlayersInRoom from "../components/PlayersInRoom";
 import ModalSettings from "../components/ModalSettings";
 import GameBoard from "../components/GameBoard";
 
-const RoomPage = ({ currentUser, players, randomWords, wordsToGuess, currentGameID, currentRound, isGameStarted, allSubmissionsForCurrentRound }) => {
+const RoomPage = ({ currentUser, players, randomWords, wordsToGuess, currentGameID, currentRound, isGameStarted, allSubmissionsForCurrentRound, handleSocketData }) => {
     const [showSettings, setShowSettings] = useState(false);
     const { roomCode } = useParams();
     const navigate = useNavigate();
@@ -53,7 +53,7 @@ const RoomPage = ({ currentUser, players, randomWords, wordsToGuess, currentGame
                 <PlayersInRoom players={players} />
             </div>
             {showSettings && <ModalSettings setShowSettings={setShowSettings} roomCode={roomCode} />}
-            {isGameStarted && <GameBoard randomWords={randomWords} wordsToGuess={wordsToGuess} players={players} currentUser={currentUser} roomCode={roomCode} currentGameID={currentGameID} currentRound={currentRound} allSubmissionsForCurrentRound={allSubmissionsForCurrentRound} />}
+            {isGameStarted && <GameBoard randomWords={randomWords} wordsToGuess={wordsToGuess} players={players} currentUser={currentUser} roomCode={roomCode} currentGameID={currentGameID} currentRound={currentRound} allSubmissionsForCurrentRound={allSubmissionsForCurrentRound} handleSocketData={handleSocketData} />}
         </div>
     );
 };
