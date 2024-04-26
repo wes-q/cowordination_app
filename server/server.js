@@ -94,6 +94,17 @@ io.on("connection", (socket) => {
         io.to(roomCode).emit("updateUI", rooms[roomCode].isGameStarted, gameState, gameID, currentRound);
     });
 
+    socket.on("nextRoundReceived", (roomCode, gameID) => {
+        console.log("next Round received");
+        const totalWords = gameState[gameID].totalWords;
+        const clues = gameState[gameID].clues;
+        const wordsToGuess = gameState[gameID].wordsToGuess;
+        console.log(`${totalWords} ${clues} ${wordsToGuess}`);
+        const currentRound = initializeRound(gameID, totalWords, clues, wordsToGuess);
+        console.log(`Started round ${currentRound}`);
+        io.to(roomCode).emit("updateUI", rooms[roomCode].isGameStarted, gameState, gameID, currentRound);
+    });
+
     socket.on("SubmitAnswerReceived", (selectedWords, currentUser, roomCode, currentGameID, currentRound) => {
         console.log(`Submit answer received from ${currentUser}`);
         const submissionObject = {
