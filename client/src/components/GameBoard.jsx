@@ -3,41 +3,9 @@ import { useState, useEffect, useRef } from "react";
 import { socket } from "../socket";
 import ScoreBoard from "./ScoreBoard";
 
-const GameBoard = ({ randomWords, randomClues, wordsToGuess, players, currentUser, roomCode, currentGameID, currentRound, isSubmitted, setIsSubmitted, hasEveryoneSubmitted, setHasEveryoneSubmitted, showScoreBoard }) => {
+const GameBoard = ({ randomWords, randomClues, wordsToGuess, players, currentUser, roomCode, currentGameID, currentRound, isSubmitted, setIsSubmitted, hasEveryoneSubmitted, setHasEveryoneSubmitted, showScoreBoard, playerScoresPerRound }) => {
     const [isReadyForSubmission, setIsReadyForSubmission] = useState(false);
     const [selectedButtons, setSelectedButtons] = useState({});
-
-    // const wordData = {
-    //     "quirked": {
-    //         isSelected: false,
-    //         answeredBy: []
-    //     },
-    //     "steenstrupine": {
-    //         isSelected: false,
-    //         answeredBy: []
-    //     },
-    //     "taffylike": {
-    //         isSelected: false,
-    //         answeredBy: []
-    //     },
-    // };
-
-    // "submissions": [
-    //     {
-    //       "player": "Wes",
-    //       "words": [
-    //         "quirked",
-    //         "steenstrupine"
-    //       ]
-    //     },
-    //     {
-    //       "player": "ICE",
-    //       "words": [
-    //         "taffylike",
-    //         "quirked"
-    //       ]
-    //     }
-    //   ]
 
     // When all players submitted their answers, update the buttons to reflect who voted which words.
     useEffect(() => {
@@ -53,8 +21,8 @@ const GameBoard = ({ randomWords, randomClues, wordsToGuess, players, currentUse
                 const { player, words } = submission;
 
                 words.forEach((word) => {
-                    console.log(`word: ${word}`);
-                    console.log(`player: ${player}`);
+                    // console.log(`word: ${word}`);
+                    // console.log(`player: ${player}`);
                     if (!updatedSelectedButtons[word].answeredBy.includes(player)) {
                         updatedSelectedButtons[word].answeredBy.push(player);
                     }
@@ -122,7 +90,6 @@ const GameBoard = ({ randomWords, randomClues, wordsToGuess, players, currentUse
 
     const handleEndGame = () => {
         socket.emit("endGameReceived", roomCode, currentGameID);
-
         console.log("Emitted end game received");
     };
 
@@ -181,7 +148,7 @@ const GameBoard = ({ randomWords, randomClues, wordsToGuess, players, currentUse
                             )}
                         </>
                     )}
-                    {showScoreBoard && <ScoreBoard />}
+                    {showScoreBoard && <ScoreBoard playerScoresPerRound={playerScoresPerRound} />}
                 </div>
             </div>
         </div>

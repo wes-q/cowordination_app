@@ -119,16 +119,41 @@ io.on("connection", (socket) => {
         if (checkIfEveryoneSubmitted(roomCode, currentGameID, currentRound)) {
             io.to(roomCode).emit("returnAnswersSent", gameState, currentGameID, currentRound);
             computeAndUpdateRoundScore(currentGameID, currentRound);
-            // console.log(compareWords(currentGameID, currentRound));
         }
 
         // Emit update UI to reflect that the client who sent already submitted.
         // socket.emit()
     });
 
-    socket.on("endGameReceived", (roomCode, gameID) => {
+    socket.on("endGameReceived", (roomCode, currentGameID) => {
         rooms[roomCode].isGameStarted = false;
-        io.to(roomCode).emit("showScoreSent");
+        // const playerScoresPerRound = [
+        //     { name: "Wes", scores: [1, 4, 3] },
+        //     { name: "Rens", scores: [2, 1, 4] },
+        // ];
+        console.log("End Game received");
+
+        const playerScoresPerRound = [];
+
+        const { rounds } = gameState[currentGameID];
+        rounds.forEach(({ round }) => {
+            console.log(round);
+            const { submissions } = gameState[currentGameID].rounds[round - 1];
+            submissions.forEach(({ player, score }) => {
+                console.log(player);
+                const playerIndex = playerScoresPerRound.findIndex((p) => p.name === player);
+                if (playerIndex !== -1) {
+                    console.log(`playerindex found ${playerIndex}`);
+                    playerScoresPerRound[playerIndex].scores.push(score);
+                } else {
+                    console.log("playerindex not found");
+                    playerScoresPerRound.push({ name: player, scores: [score] });
+                }
+            });
+        });
+        console.log(playerScoresPerRound);
+
+        io.to(roomCode).emit("showScoreSent", playerScoresPerRound);
         console.log(`Game ended on room ${roomCode}`);
     });
 
@@ -223,6 +248,15 @@ app.get("/rounds/:id", (req, res) => {
         res.json(roundState[roundID]);
     } else {
         res.status(404).json({ error: "Round not found" });
+    }
+});
+
+app.get("/games/:id/scores", (req, res) => {
+    const gameID = req.params.id;
+    if (gameState.hasOwnProperty(gameID)) {
+        res.json(gameState[gameID]);
+    } else {
+        res.status(404).json({ error: "Game not found" });
     }
 });
 
