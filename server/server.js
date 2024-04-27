@@ -112,24 +112,23 @@ io.on("connection", (socket) => {
         const submissionObject = {
             player: currentUser,
             words: selectedWords,
+            score: 0,
         };
         gameState[currentGameID].rounds[currentRound - 1].submissions.push(submissionObject);
 
-        // Check if everyone already submitted
         if (checkIfEveryoneSubmitted(roomCode, currentGameID, currentRound)) {
-            // fetch all answers from other players
-            // const otherPlayersSubmissionsArray = fetchOtherPlayersSubmissions(currentUser, currentGameID, currentRound);
-            // console.log(otherPlayersSubmissionsArray);
             io.to(roomCode).emit("returnAnswersSent", gameState, currentGameID, currentRound);
+            computeAndUpdateRoundScore(currentGameID, currentRound);
+            // console.log(compareWords(currentGameID, currentRound));
         }
 
         // Emit update UI to reflect that the client who sent already submitted.
         // socket.emit()
     });
 
-    socket.on("endGameReceived", (roomCode) => {
+    socket.on("endGameReceived", (roomCode, gameID) => {
         rooms[roomCode].isGameStarted = false;
-        io.to(roomCode).emit("endGameSent");
+        io.to(roomCode).emit("showScoreSent");
         console.log(`Game ended on room ${roomCode}`);
     });
 
@@ -253,7 +252,98 @@ const checkIfEveryoneSubmitted = (roomCode, gameID, currentRound) => {
     }
 };
 
-// const fetchOtherPlayersSubmissions = (currentUser, gameID, currentRound) => {
-//     const otherPlayersSubmissionsArray = gameState[gameID].rounds[currentRound - 1].submissions.filter((submission) => submission.player !== currentUser);
-//     return otherPlayersSubmissionsArray;
+// const computeAndUpdateRoundScore = (currentGameID, currentRound) => {
+//     console.log("COMPUTEAND UPDATE ROUNDSCORE");
+//     if (gameState[currentGameID].rounds[currentRound - 1].submissions.score) {
+//         console.log("score found");
+//         gameState[currentGameID].rounds[currentRound - 1].submissions.score = 21;
+//         gameState[currentGameID].rounds[currentRound - 1].submissions.player = "X";
+//     } else {
+//         console.log("score not found");
+//         gameState[currentGameID].rounds[currentRound - 1].submissions.score = 22;
+//         gameState[currentGameID].rounds[currentRound - 1].submissions.player = "X";
+//     }
 // };
+
+// const computeAndUpdateRoundScore = (currentGameID, currentRound) => {
+//     console.log("COMPUTE AND UPDATE ROUND SCORE");
+//     // Check if the submissions array exists for the current game round
+//     if (!gameState[currentGameID].rounds[currentRound - 1].submissions) {
+//         // If it doesn't exist, create an empty array
+//         console.log("submission array found");
+//         gameState[currentGameID].rounds[currentRound - 1].submissions = [];
+//     } else {
+//         console.log("submission array not found");
+//     }
+
+//     // Check if the score field exists
+//     if (gameState[currentGameID].rounds[currentRound - 1].submissions[0].score !== undefined) {
+//         console.log("Score found");
+//         // Update the score and player fields
+//         gameState[currentGameID].rounds[currentRound - 1].submissions[0].score = 21;
+//         gameState[currentGameID].rounds[currentRound - 1].submissions[0].player = "X";
+//     } else {
+//         console.log("Score not found");
+//         // Update the score and player fields
+//         gameState[currentGameID].rounds[currentRound - 1].submissions[0].score = 22;
+//         gameState[currentGameID].rounds[currentRound - 1].submissions[0].player = "X";
+//     }
+// };
+
+// const computeAndUpdateRoundScore = (currentGameID, currentRound) => {
+//     const wordsToGuess =gameState[currentGameID].wordsToGuess;
+//     const submissions = gameState[currentGameID].rounds[currentRound - 1].submissions;
+
+//     // submissions.map((submission) => {
+//     //     return (submission.score = 21);
+//     // });
+
+//     for (let i = 0; i < submissions.length; i++) {
+//         for (let j = 0; j< wordsToGuess; j++) {
+
+//             const  = submissions[i].words[j];
+//         }
+//     }
+// };
+
+// function compareWords(currentGameID, currentRound) {
+//     const { submissions } = gameState[currentGameID].rounds[currentRound - 1]; // Assuming only one round for simplicity
+//     const comparedResults = {};
+
+//     submissions.forEach((submission) => {
+//         const { player, words } = submission;
+//         const otherPlayers = submissions.filter((sub) => sub.player !== player);
+
+//         comparedResults[player] = {};
+
+//         otherPlayers.forEach((otherSubmission) => {
+//             const { player: otherPlayer, words: otherWords } = otherSubmission;
+//             const commonWords = words.filter((word) => otherWords.includes(word));
+
+//             comparedResults[player][otherPlayer] = commonWords;
+//         });
+//     });
+
+//     return comparedResults;
+// }
+
+function computeAndUpdateRoundScore(currentGameID, currentRound) {
+    const { submissions } = gameState[currentGameID].rounds[currentRound - 1];
+
+    submissions.forEach(({ player, words }) => {
+        submissions.forEach(({ player: otherPlayer, words: otherWords }) => {
+            if (player === otherPlayer) return;
+
+            words.forEach((word) => {
+                if (otherWords.includes(word)) {
+                    const currentPlayerSubmission = submissions.find((submission) => submission.player === player);
+                    if (currentPlayerSubmission) {
+                        currentPlayerSubmission.score += 1;
+                    }
+                }
+            });
+        });
+    });
+
+    return gameState;
+}

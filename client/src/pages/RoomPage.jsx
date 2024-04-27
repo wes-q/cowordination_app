@@ -5,7 +5,7 @@ import PlayersInRoom from "../components/PlayersInRoom";
 import ModalSettings from "../components/ModalSettings";
 import GameBoard from "../components/GameBoard";
 
-const RoomPage = ({ currentUser, players, randomWords, randomClues, wordsToGuess, currentGameID, currentRound, isGameStarted, isSubmitted, setIsSubmitted, hasEveryoneSubmitted, setHasEveryoneSubmitted }) => {
+const RoomPage = ({ currentUser, players, randomWords, randomClues, wordsToGuess, currentGameID, currentRound, isGameStarted, isSubmitted, setIsSubmitted, hasEveryoneSubmitted, setHasEveryoneSubmitted, showScoreBoard }) => {
     const [showSettings, setShowSettings] = useState(false);
     const { roomCode } = useParams();
     const navigate = useNavigate();
@@ -53,7 +53,7 @@ const RoomPage = ({ currentUser, players, randomWords, randomClues, wordsToGuess
                 <PlayersInRoom players={players} />
             </div>
             {showSettings && <ModalSettings setShowSettings={setShowSettings} roomCode={roomCode} />}
-            {isGameStarted && <GameBoard randomWords={randomWords} randomClues={randomClues} wordsToGuess={wordsToGuess} players={players} currentUser={currentUser} roomCode={roomCode} currentGameID={currentGameID} currentRound={currentRound} isSubmitted={isSubmitted} setIsSubmitted={setIsSubmitted} hasEveryoneSubmitted={hasEveryoneSubmitted} setHasEveryoneSubmitted={setHasEveryoneSubmitted} />}
+            {isGameStarted && <GameBoard randomWords={randomWords} randomClues={randomClues} wordsToGuess={wordsToGuess} players={players} currentUser={currentUser} roomCode={roomCode} currentGameID={currentGameID} currentRound={currentRound} isSubmitted={isSubmitted} setIsSubmitted={setIsSubmitted} hasEveryoneSubmitted={hasEveryoneSubmitted} setHasEveryoneSubmitted={setHasEveryoneSubmitted} showScoreBoard={showScoreBoard} />}
         </div>
     );
 };

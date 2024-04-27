@@ -22,6 +22,7 @@ const App = () => {
 
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [hasEveryoneSubmitted, setHasEveryoneSubmitted] = useState(false);
+    const [showScoreBoard, setShowScoreBoard] = useState(false);
 
     useEffect(() => {
         socket.on("broadcastSent", (message) => {
@@ -51,7 +52,14 @@ const App = () => {
             setHasEveryoneSubmitted(false);
         });
 
+        socket.on("showScoreSent", (roomCode, currentGameID) => {
+            setShowScoreBoard(true);
+            // setIsSubmitted(false);
+            // setHasEveryoneSubmitted(false);
+        });
+
         return () => {
+            socket.off("showScoreSent");
             socket.off("broadcastSent");
             socket.off("updatePlayerList");
             socket.off("updateUI");
@@ -90,7 +98,7 @@ const App = () => {
             <>
                 <Route element={isUserLoggedIn ? <PrivateRoutes isUserLoggedIn={isUserLoggedIn} /> : <LoginPage />}>
                     <Route index element={<LobbyPage currentUser={currentUser} />} />
-                    <Route path="room/:roomCode" element={<RoomPage currentUser={currentUser} players={players} randomWords={randomWords} randomClues={randomClues} wordsToGuess={wordsToGuess} currentGameID={currentGameID} currentRound={currentRound} isGameStarted={isGameStarted} isSubmitted={isSubmitted} setIsSubmitted={setIsSubmitted} hasEveryoneSubmitted={hasEveryoneSubmitted} setHasEveryoneSubmitted={setHasEveryoneSubmitted} />} />
+                    <Route path="room/:roomCode" element={<RoomPage currentUser={currentUser} players={players} randomWords={randomWords} randomClues={randomClues} wordsToGuess={wordsToGuess} currentGameID={currentGameID} currentRound={currentRound} isGameStarted={isGameStarted} isSubmitted={isSubmitted} setIsSubmitted={setIsSubmitted} hasEveryoneSubmitted={hasEveryoneSubmitted} setHasEveryoneSubmitted={setHasEveryoneSubmitted} showScoreBoard={showScoreBoard} />} />
                 </Route>
                 <Route path="*" element={<NotFoundPage />} />
                 <Route path="login" element={<LoginPage />} />
