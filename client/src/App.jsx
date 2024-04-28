@@ -26,9 +26,6 @@ const App = () => {
     const [playerScoresPerRound, setPlayerScoresPerRound] = useState([]);
 
     useEffect(() => {
-        socket.on("broadcastSent", (message) => {
-            console.log("Broadcasted message:", message);
-        });
         socket.on("updatePlayerList", (updatedPlayers) => {
             console.log("UPDATED PLAYER LIST");
             setPlayers(updatedPlayers);
@@ -51,19 +48,19 @@ const App = () => {
 
             setIsSubmitted(false);
             setHasEveryoneSubmitted(false);
+            setShowScoreBoard(false);
         });
 
         socket.on("showScoreSent", (playerScoresPerRound) => {
             console.log("show score sent");
             setPlayerScoresPerRound(playerScoresPerRound);
             setShowScoreBoard(true);
-            // setIsSubmitted(false);
-            // setHasEveryoneSubmitted(false);
+            setIsSubmitted(false);
+            setHasEveryoneSubmitted(false);
         });
 
         return () => {
             socket.off("showScoreSent");
-            socket.off("broadcastSent");
             socket.off("updatePlayerList");
             socket.off("updateUI");
         };
@@ -101,7 +98,7 @@ const App = () => {
             <>
                 <Route element={isUserLoggedIn ? <PrivateRoutes isUserLoggedIn={isUserLoggedIn} /> : <LoginPage />}>
                     <Route index element={<LobbyPage currentUser={currentUser} />} />
-                    <Route path="room/:roomCode" element={<RoomPage currentUser={currentUser} players={players} randomWords={randomWords} randomClues={randomClues} wordsToGuess={wordsToGuess} currentGameID={currentGameID} currentRound={currentRound} isGameStarted={isGameStarted} isSubmitted={isSubmitted} setIsSubmitted={setIsSubmitted} hasEveryoneSubmitted={hasEveryoneSubmitted} setHasEveryoneSubmitted={setHasEveryoneSubmitted} showScoreBoard={showScoreBoard} playerScoresPerRound={playerScoresPerRound} />} />
+                    <Route path="room/:roomCode" element={<RoomPage currentUser={currentUser} players={players} randomWords={randomWords} randomClues={randomClues} wordsToGuess={wordsToGuess} currentGameID={currentGameID} currentRound={currentRound} isGameStarted={isGameStarted} isSubmitted={isSubmitted} setIsSubmitted={setIsSubmitted} hasEveryoneSubmitted={hasEveryoneSubmitted} setHasEveryoneSubmitted={setHasEveryoneSubmitted} showScoreBoard={showScoreBoard} playerScoresPerRound={playerScoresPerRound} setIsGameStarted={setIsGameStarted} />} />
                 </Route>
                 <Route path="*" element={<NotFoundPage />} />
                 <Route path="login" element={<LoginPage />} />
