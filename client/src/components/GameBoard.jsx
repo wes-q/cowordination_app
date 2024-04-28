@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { socket } from "../socket";
 import ScoreBoard from "./ScoreBoard";
 
-const GameBoard = ({ randomWords, randomClues, wordsToGuess, players, currentUser, roomCode, currentGameID, currentRound, isSubmitted, setIsSubmitted, hasEveryoneSubmitted, setHasEveryoneSubmitted, showScoreBoard, playerScoresPerRound }) => {
+const GameBoard = ({ randomWords, randomClues, wordsToGuess, players, currentUser, roomCode, currentGameID, currentRound, isSubmitted, setIsSubmitted, hasEveryoneSubmitted, setHasEveryoneSubmitted, showScoreBoard, playerScoresPerRound, setIsGameStarted }) => {
     const [isReadyForSubmission, setIsReadyForSubmission] = useState(false);
     const [selectedButtons, setSelectedButtons] = useState({});
 
@@ -148,7 +148,7 @@ const GameBoard = ({ randomWords, randomClues, wordsToGuess, players, currentUse
                             )}
                         </>
                     )}
-                    {showScoreBoard && <ScoreBoard playerScoresPerRound={playerScoresPerRound} />}
+                    {showScoreBoard && <ScoreBoard playerScoresPerRound={playerScoresPerRound} setIsGameStarted={setIsGameStarted} />}
                 </div>
             </div>
         </div>

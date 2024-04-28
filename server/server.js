@@ -83,10 +83,6 @@ io.on("connection", (socket) => {
         console.log(`User ${currentUser} left ${roomCode}`);
     });
 
-    socket.on("broadcastReceived", (roomCode, currentUser) => {
-        io.to(roomCode).emit("broadcastSent", `${currentUser} says "Hello World!" to everybody`);
-        console.log(`broadcast received by server ${roomCode} ${currentUser}`);
-    });
     socket.on("startGameReceived", (roomCode, totalWords, clues, wordsToGuess) => {
         rooms[roomCode].isGameStarted = true;
         const gameID = initializeGame(totalWords, clues, wordsToGuess);
@@ -285,81 +281,6 @@ const checkIfEveryoneSubmitted = (roomCode, gameID, currentRound) => {
         return false;
     }
 };
-
-// const computeAndUpdateRoundScore = (currentGameID, currentRound) => {
-//     console.log("COMPUTEAND UPDATE ROUNDSCORE");
-//     if (gameState[currentGameID].rounds[currentRound - 1].submissions.score) {
-//         console.log("score found");
-//         gameState[currentGameID].rounds[currentRound - 1].submissions.score = 21;
-//         gameState[currentGameID].rounds[currentRound - 1].submissions.player = "X";
-//     } else {
-//         console.log("score not found");
-//         gameState[currentGameID].rounds[currentRound - 1].submissions.score = 22;
-//         gameState[currentGameID].rounds[currentRound - 1].submissions.player = "X";
-//     }
-// };
-
-// const computeAndUpdateRoundScore = (currentGameID, currentRound) => {
-//     console.log("COMPUTE AND UPDATE ROUND SCORE");
-//     // Check if the submissions array exists for the current game round
-//     if (!gameState[currentGameID].rounds[currentRound - 1].submissions) {
-//         // If it doesn't exist, create an empty array
-//         console.log("submission array found");
-//         gameState[currentGameID].rounds[currentRound - 1].submissions = [];
-//     } else {
-//         console.log("submission array not found");
-//     }
-
-//     // Check if the score field exists
-//     if (gameState[currentGameID].rounds[currentRound - 1].submissions[0].score !== undefined) {
-//         console.log("Score found");
-//         // Update the score and player fields
-//         gameState[currentGameID].rounds[currentRound - 1].submissions[0].score = 21;
-//         gameState[currentGameID].rounds[currentRound - 1].submissions[0].player = "X";
-//     } else {
-//         console.log("Score not found");
-//         // Update the score and player fields
-//         gameState[currentGameID].rounds[currentRound - 1].submissions[0].score = 22;
-//         gameState[currentGameID].rounds[currentRound - 1].submissions[0].player = "X";
-//     }
-// };
-
-// const computeAndUpdateRoundScore = (currentGameID, currentRound) => {
-//     const wordsToGuess =gameState[currentGameID].wordsToGuess;
-//     const submissions = gameState[currentGameID].rounds[currentRound - 1].submissions;
-
-//     // submissions.map((submission) => {
-//     //     return (submission.score = 21);
-//     // });
-
-//     for (let i = 0; i < submissions.length; i++) {
-//         for (let j = 0; j< wordsToGuess; j++) {
-
-//             const  = submissions[i].words[j];
-//         }
-//     }
-// };
-
-// function compareWords(currentGameID, currentRound) {
-//     const { submissions } = gameState[currentGameID].rounds[currentRound - 1]; // Assuming only one round for simplicity
-//     const comparedResults = {};
-
-//     submissions.forEach((submission) => {
-//         const { player, words } = submission;
-//         const otherPlayers = submissions.filter((sub) => sub.player !== player);
-
-//         comparedResults[player] = {};
-
-//         otherPlayers.forEach((otherSubmission) => {
-//             const { player: otherPlayer, words: otherWords } = otherSubmission;
-//             const commonWords = words.filter((word) => otherWords.includes(word));
-
-//             comparedResults[player][otherPlayer] = commonWords;
-//         });
-//     });
-
-//     return comparedResults;
-// }
 
 function computeAndUpdateRoundScore(currentGameID, currentRound) {
     const { submissions } = gameState[currentGameID].rounds[currentRound - 1];
